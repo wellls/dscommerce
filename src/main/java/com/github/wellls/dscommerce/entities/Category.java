@@ -42,6 +42,10 @@ public class Category {
         this.name = name;
     }
 
+    public Set<Product> getProducts() {
+        return products;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -53,9 +57,5 @@ public class Category {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
-    }
-
-    public Set<Product> getProducts() {
-        return products;
     }
 }
