@@ -3,11 +3,17 @@ package com.github.wellls.dscommerce.services;
 import com.github.wellls.dscommerce.dto.ProductDTO;
 import com.github.wellls.dscommerce.entities.Product;
 import com.github.wellls.dscommerce.repositories.ProductRepository;
+import com.github.wellls.dscommerce.services.exceptions.DatabaseException;
 import com.github.wellls.dscommerce.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -18,7 +24,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
         Product product = repository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Resource not found"));
+                () -> new ResourceNotFoundException());
         return new ProductDTO(product);
     }
 
@@ -28,7 +34,7 @@ public class ProductService {
         return products.map(product -> new ProductDTO(product));
     }
 
-    @Transactional()
+    @Transactional
     public ProductDTO insert(ProductDTO dto) {
         Product product = new Product();
         this.copyDtoToEntity(dto, product);
@@ -36,17 +42,30 @@ public class ProductService {
         return new ProductDTO(product);
     }
 
-    @Transactional()
+    @Transactional
     public ProductDTO update(Long id, ProductDTO dto) {
-        Product product = repository.getReferenceById(id);
-        this.copyDtoToEntity(dto, product);
-        product = repository.save(product);
-        return new ProductDTO(product);
+        try {
+            Product product = repository.getReferenceById(id);
+            this.copyDtoToEntity(dto, product);
+            product = repository.save(product);
+            return new ProductDTO(product);
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException();
+        }
     }
 
-    @Transactional()
+    @Transactional
     public void delete(Long id) {
-        repository.deleteById(id);
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException();
+        }
+
+        try {
+            repository.deleteById(id);
+            repository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new DatabaseException("Referential integrity violation while deleting resource with id " + id);
+        }
     }
 
     private void copyDtoToEntity(ProductDTO dto, Product product) {
