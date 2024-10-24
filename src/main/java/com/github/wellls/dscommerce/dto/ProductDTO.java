@@ -1,13 +1,25 @@
 package com.github.wellls.dscommerce.dto;
 
 import com.github.wellls.dscommerce.entities.Product;
-import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+
 
 public class ProductDTO {
     private Long id;
+
+    @Size(min = 3, max = 80, message = "name must be between 3 and 80 characters long")
+    @NotBlank(message = "required field")
     private String name;
+
+    @Size(min = 10, message = "description must have at least 10 characters long")
+    @NotBlank(message = "required field")
     private String description;
+
+    @Positive(message = "price must be positive")
     private Double price;
+
     private String imgUrl;
 
     public ProductDTO(Long id, String name, String description, Double price, String imgUrl) {
