@@ -6,31 +6,26 @@ import java.time.Instant;
 import java.util.Objects;
 
 @Entity
-@Table(name = "tb_order")
-public class Order {
+@Table(name = "tb_payment")
+public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant moment;
-    private OrderStatus status;
 
-    @ManyToOne
-    @JoinColumn(name = "client_id")
-    private User client;
+    @OneToOne
+    @MapsId
+    private Order order;
 
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    private Payment payment;
-
-    public Order() {
+    public Payment() {
     }
 
-    public Order(Long id, Instant moment, OrderStatus status, User client) {
+    public Payment(Long id, Instant moment, Order order) {
         this.id = id;
         this.moment = moment;
-        this.status = status;
-        this.client = client;
+        this.order = order;
     }
 
     public Long getId() {
@@ -49,27 +44,19 @@ public class Order {
         this.moment = moment;
     }
 
-    public OrderStatus getStatus() {
-        return status;
+    public Order getOrder() {
+        return order;
     }
 
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-    }
-
-    public User getClient() {
-        return client;
-    }
-
-    public void setClient(User client) {
-        this.client = client;
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        Order order = (Order) o;
-        return Objects.equals(id, order.id);
+        Payment payment = (Payment) o;
+        return Objects.equals(id, payment.id);
     }
 
     @Override
