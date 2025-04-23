@@ -3,15 +3,15 @@ package com.github.wellls.dscommerce.services;
 import com.github.wellls.dscommerce.dtos.ProductDTO;
 import com.github.wellls.dscommerce.entities.Product;
 import com.github.wellls.dscommerce.repositories.ProductRepository;
+import com.github.wellls.dscommerce.services.exceptions.DatabaseIntegrityException;
 import com.github.wellls.dscommerce.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -41,15 +41,27 @@ public class ProductService {
 
     @Transactional()
     public ProductDTO update(Long id, ProductDTO dto) {
-        Product product = repository.getReferenceById(id);
-        copyDtoToEntity(dto, product);
-        product = repository.save(product);
-        return new ProductDTO(product);
+        try {
+            Product product = repository.getReferenceById(id);
+            copyDtoToEntity(dto, product);
+            return new ProductDTO(product);
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException();
+        }
     }
 
     @Transactional
     public void delete(Long id) {
-        repository.deleteById(id);
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException();
+        }
+
+        try {
+            repository.deleteById(id);
+            repository.flush(); // força o commit da transação e já executa o SQL
+        } catch (DataIntegrityViolationException e) {
+            throw new DatabaseIntegrityException("Referential integrity violation. Cannot delete.");
+        }
     }
 
     private void copyDtoToEntity(ProductDTO dto, Product product) {
