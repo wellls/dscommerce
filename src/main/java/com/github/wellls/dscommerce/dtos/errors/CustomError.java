@@ -1,4 +1,4 @@
-package com.github.wellls.dscommerce.dtos;
+package com.github.wellls.dscommerce.dtos.errors;
 
 import java.time.Instant;
 
