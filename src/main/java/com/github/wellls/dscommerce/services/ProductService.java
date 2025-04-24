@@ -8,10 +8,13 @@ import com.github.wellls.dscommerce.services.exceptions.ResourceNotFoundExceptio
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class ProductService {
@@ -52,17 +55,17 @@ public class ProductService {
 
     @Transactional
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException();
-        }
-
         try {
-            repository.deleteById(id);
-            repository.flush(); // força o commit da transação e já executa o SQL
+            Product entity = repository.getReferenceById(id);
+            repository.delete(entity);
+            repository.flush();
+        } catch (EmptyResultDataAccessException | JpaObjectRetrievalFailureException e) {
+            throw new ResourceNotFoundException();
         } catch (DataIntegrityViolationException e) {
             throw new DatabaseIntegrityException("Referential integrity violation. Cannot delete.");
         }
     }
+
 
     private void copyDtoToEntity(ProductDTO dto, Product product) {
         product.setName(dto.getName());
