@@ -1,7 +1,9 @@
 package com.github.wellls.dscommerce.services;
 
+import com.github.wellls.dscommerce.dtos.CategoryDTO;
 import com.github.wellls.dscommerce.dtos.ProductDTO;
 import com.github.wellls.dscommerce.dtos.ProductMinDTO;
+import com.github.wellls.dscommerce.entities.Category;
 import com.github.wellls.dscommerce.entities.Product;
 import com.github.wellls.dscommerce.repositories.ProductRepository;
 import com.github.wellls.dscommerce.services.exceptions.DatabaseIntegrityException;
@@ -73,6 +75,12 @@ public class ProductService {
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
         product.setImgUrl(dto.getImgUrl());
-    }
 
+        product.getCategories().clear();
+        for(CategoryDTO categoryDTO : dto.getCategories()) {
+            Category category = new Category();
+            category.setId(categoryDTO.getId());
+            product.getCategories().add(category);
+        }
+    }
 }
