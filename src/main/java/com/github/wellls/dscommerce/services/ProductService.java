@@ -1,6 +1,7 @@
 package com.github.wellls.dscommerce.services;
 
 import com.github.wellls.dscommerce.dtos.ProductDTO;
+import com.github.wellls.dscommerce.dtos.ProductMinDTO;
 import com.github.wellls.dscommerce.entities.Product;
 import com.github.wellls.dscommerce.repositories.ProductRepository;
 import com.github.wellls.dscommerce.services.exceptions.DatabaseIntegrityException;
@@ -29,9 +30,9 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductDTO> findAll(String name, Pageable pageable) {
+    public Page<ProductMinDTO> findAll(String name, Pageable pageable) {
         Page<Product> products = repository.searchByName(name, pageable);
-        return products.map(product -> new ProductDTO(product));
+        return products.map(product -> new ProductMinDTO(product));
     }
 
     @Transactional()
