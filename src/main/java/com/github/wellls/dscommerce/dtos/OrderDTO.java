@@ -3,6 +3,7 @@ package com.github.wellls.dscommerce.dtos;
 import com.github.wellls.dscommerce.entities.Order;
 import com.github.wellls.dscommerce.entities.OrderItem;
 import com.github.wellls.dscommerce.entities.OrderStatus;
+import jakarta.validation.constraints.NotEmpty;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ public class OrderDTO {
     private ClientDTO client;
     private PaymentDTO payment;
 
+    @NotEmpty(message = "Should not to be empty")
     private final List<OrderItemDTO> items = new ArrayList<>();
 
     public OrderDTO() {
