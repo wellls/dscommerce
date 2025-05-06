@@ -2,10 +2,7 @@ package com.github.wellls.dscommerce.dtos;
 
 import com.github.wellls.dscommerce.entities.Category;
 import com.github.wellls.dscommerce.entities.Product;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +19,7 @@ public class ProductDTO {
     private String description;
 
     @Positive(message = "Price must be positive")
+    @NotNull(message = "Required field")
     private Double price;
     private String imgUrl;
 
